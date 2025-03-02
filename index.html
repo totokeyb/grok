@@ -120,7 +120,10 @@
     </div>
 
     <script>
-        // 动态时钟
+        // API 密钥
+        const API_KEY = 'pnkLnOxSEamxLrHDWB1bfw==AbazRJeZmgWiYv1x';
+
+        // 动态时钟和问候语
         function updateClock() {
             const now = new Date();
             document.getElementById('clock').textContent = now.toLocaleTimeString('zh-CN', { hour12: false });
@@ -140,70 +143,39 @@
         setInterval(updateClock, 1000);
         updateClock();
 
-        // 天气信息
+        // API Ninjas Weather API（天气）
         const weatherElement = document.getElementById('weather');
-        fetch('https://wttr.in/大连?format=%C+%t+%h+%w+%d')
-            .then(response => response.text())
+        fetch('https://api.api-ninjas.com/v1/weather?city=Dalian', {
+            headers: { 'X-Api-Key': API_KEY }
+        })
+            .then(response => response.json())
             .then(data => {
-                const weatherMatch = data.match(/(\S+)\s+([+-]?\d+°C)\s+(\d+%)\s+([↑↓←→↗↘↙↖]\d+km\/h)/);
-                if (!weatherMatch) throw new Error("数据格式不匹配");
-                const weather = weatherMatch[1];
-                const temp = weatherMatch[2];
-                const humidity = weatherMatch[3];
-                const windWithDirection = weatherMatch[4];
-                const windSymbol = windWithDirection.match(/[↑↓←→↗↘↙↖]/)[0];
-                const windSpeed = windWithDirection.replace(/[^0-9.]/g, '');
+                const temp = data.temp ? `${data.temp}°C` : '未知';
+                const humidity = data.humidity ? `${data.humidity}%` : '未知';
+                const windSpeed = data.wind_speed ? `${data.wind_speed}km/h` : '未知';
                 const weatherIcons = {
-                    '晴': 'https://img.icons8.com/color/48/000000/sun.png',
-                    '晴天': 'https://img.icons8.com/color/48/000000/sun.png',
-                    '多云': 'https://img.icons8.com/color/48/000000/partly-cloudy-day.png',
-                    '阴': 'https://img.icons8.com/color/48/000000/cloud.png',
-                    '雨': 'https://img.icons8.com/color/48/000000/rain.png',
-                    '雪': 'https://img.icons8.com/color/48/000000/snow.png'
+                    'clear': 'https://img.icons8.com/color/48/000000/sun.png',
+                    'cloudy': 'https://img.icons8.com/color/48/000000/cloud.png',
+                    'rain': 'https://img.icons8.com/color/48/000000/rain.png',
+                    'snow': 'https://img.icons8.com/color/48/000000/snow.png'
                 };
-                const weatherIcon = weatherIcons[weather] || 'https://img.icons8.com/color/48/000000/question-mark.png';
-                weatherElement.innerHTML = `天气：${weather} <img src="${weatherIcon}" alt="${weather}"> | 温度：${temp} | 湿度：${humidity} | 风速：${windSymbol}${windSpeed}km/h`;
+                const icon = weatherIcons[data.cloud_pct > 50 ? 'cloudy' : 'clear'] || 'https://img.icons8.com/color/48/000000/question-mark.png';
+                weatherElement.innerHTML = `天气：${data.cloud_pct > 50 ? '多云' : '晴'} <img src="${icon}" alt="weather"> | 温度：${temp} | 湿度：${humidity} | 风速：${windSpeed}`;
             })
             .catch(() => weatherElement.textContent = '天气：无法加载');
 
-        // 每日一句（扩展到20条）
-        const quotes = [
-            "生命是一场旅行，不是目的地，而是沿途的风景。——佚名",
-            "最深的河流总是最安静地流淌。——拉丁谚语",
-            "每一个日出都带来新的希望。——佚名",
-            "自然的美是无声的诗。——约翰·济慈",
-            "坚持不懈，直到成功。——丘吉尔",
-            "时间是治愈一切的良药。——古罗马谚语",
-            "勇敢面对风暴，你会发现自己的力量。——佚名",
-            "幸福是内心的平静。——达赖喇嘛",
-            "每一滴水都能折射出整个太阳。——印度谚语",
-            "行动是梦想的起点。——沃尔特·迪士尼",
-            "生活是一面镜子，你对它笑，它就对你笑。——佚名",
-            "成功的秘诀在于永不放弃。——爱迪生",
-            "心若向阳，无畏悲伤。——佚名",
-            "机会总是留给有准备的人。——巴斯德",
-            "逆境是成长的催化剂。——佚名",
-            "用爱和智慧点亮人生。——卢梭",
-            "真正的财富是健康与时间。——富兰克林",
-            "简单生活，心灵自由。——梭罗",
-            "相信自己，你已成功一半。——罗斯福",
-            "世界因你而不同，勇敢做自己。——佚名"
-        ];
-        function getRandomQuote() {
-            let usedQuotes = JSON.parse(localStorage.getItem('usedQuotes')) || [];
-            let availableQuotes = quotes.filter(q => !usedQuotes.includes(q));
-            if (availableQuotes.length === 0) {
-                usedQuotes = [];
-                availableQuotes = quotes.slice();
-            }
-            const quote = availableQuotes[Math.floor(Math.random() * availableQuotes.length)];
-            usedQuotes.push(quote);
-            localStorage.setItem('usedQuotes', JSON.stringify(usedQuotes));
-            return quote;
-        }
-        document.getElementById('quote').textContent = `每日一句：${getRandomQuote()}`;
+        // API Ninjas Quotes API（每日一句）
+        fetch('https://api.api-ninjas.com/v1/quotes?category=inspirational', {
+            headers: { 'X-Api-Key': API_KEY }
+        })
+            .then(response => response.json())
+            .then(data => {
+                const quote = data[0].quote + ' ——' + data[0].author;
+                document.getElementById('quote').textContent = `每日一句：${quote}`;
+            })
+            .catch(() => document.getElementById('quote').textContent = '每日一句：无法加载');
 
-        // 月相
+        // 月相（保持简单计算）
         function updateLunarPhase() {
             const now = new Date();
             const lunarDay = now.getDate() % 30;
@@ -218,64 +190,44 @@
             document.getElementById('background-image').src = `https://source.unsplash.com/random/1920x1080/?nature&${new Date().getTime()}`;
         });
 
-        // 每日运势（扩展到20条）
-        const fortunes = [
-            "今天适合尝试新事物，好运会伴随你。",
-            "保持耐心，成功就在前方等待。",
-            "与人合作将带来意外收获。",
-            "今天是思考未来的好时机。",
-            "小风险可能带来大回报。",
-            "积极的心态会为你打开新门。",
-            "今天宜倾听内心，直觉最准。",
-            "努力终有回报，坚持下去。",
-            "与朋友相处，欢乐加倍。",
-            "勇敢表达自己，机会自来。",
-            "今天适合学习新技能。",
-            "平静应对挑战，智慧显现。",
-            "好运藏在细节中，细心观察。",
-            "今天宜放下顾虑，轻装前行。",
-            "笑容是你今日的幸运符。",
-            "意外之喜将在午后出现。",
-            "保持专注，目标更近一步。",
-            "今天适合户外活动，焕发活力。",
-            "善待他人，好运循环。",
-            "大胆梦想，宇宙为你助力。"
-        ];
-        document.getElementById('daily-fortune').textContent = `今日运势：${fortunes[Math.floor(Math.random() * fortunes.length)]}`;
+        // API Ninjas Quotes API（每日运势，使用 happiness 类别）
+        fetch('https://api.api-ninjas.com/v1/quotes?category=happiness', {
+            headers: { 'X-Api-Key': API_KEY }
+        })
+            .then(response => response.json())
+            .then(data => {
+                const fortune = data[0].quote;
+                document.getElementById('daily-fortune').textContent = `今日运势：${fortune}`;
+            })
+            .catch(() => document.getElementById('daily-fortune').textContent = '今日运势：无法加载');
 
-        // 自然小知识（扩展到20条）
-        const natureFacts = [
-            "蜜蜂一生只能蜇一次，之后它们会死去。",
-            "章鱼有三个心脏，可以改变颜色融入环境。",
-            "地球上最老的树已有4850多年历史。",
-            "鲸鱼的歌声可以在海洋中传播数千公里。",
-            "北极熊的毛其实是透明的，看起来白是因为光反射。",
-            "海星没有大脑，却能感知周围环境。",
-            "树懒每分钟心跳只有约40次。",
-            "企鹅能在水下憋气超过20分钟。",
-            "红杉树是地球上最高的树种，可达115米。",
-            "蝙蝠是唯一会飞的哺乳动物。",
-            "珊瑚礁被称为海洋的热带雨林。",
-            "乌鸦能记住人类的模样长达数年。",
-            "沙漠中的仙人掌能储存数升水。",
-            "闪电每次击中地面释放的能量可点亮100万盏灯。",
-            "袋鼠跳跃时速可达70公里。",
-            "蓝鲸的心脏重达180公斤。",
-            "萤火虫发光是为了吸引伴侣。",
-            "非洲象的耳朵能帮助散热。",
-            "蜘蛛丝的强度堪比钢丝。",
-            "猫头鹰能将头部旋转270度。"
-        ];
-        document.getElementById('nature-fact').textContent = `自然小知识：${natureFacts[Math.floor(Math.random() * natureFacts.length)]}`;
+        // API Ninjas Facts API（自然小知识）
+        fetch('https://api.api-ninjas.com/v1/facts?limit=1', {
+            headers: { 'X-Api-Key': API_KEY }
+        })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('nature-fact').textContent = `自然小知识：${data[0].fact}`;
+            })
+            .catch(() => document.getElementById('nature-fact').textContent = '自然小知识：无法加载');
 
-        // 日出日落时间
-        function updateSunTimes() {
-            const now = new Date();
-            const sunrise = new Date(now.setHours(6, 30, 0)).toLocaleTimeString('zh-CN', { hour12: false });
-            const sunset = new Date(now.setHours(18, 45, 0)).toLocaleTimeString('zh-CN', { hour12: false });
-            document.getElementById('sun-times').textContent = `日出：${sunrise} | 日落：${sunset}`;
-        }
-        updateSunTimes();
+        // API Ninjas City API + Sunrise-Sunset API（日出日落）
+        fetch('https://api.api-ninjas.com/v1/city?name=Dalian', {
+            headers: { 'X-Api-Key': API_KEY }
+        })
+            .then(response => response.json())
+            .then(data => {
+                const lat = data[0].latitude;
+                const lon = data[0].longitude;
+                return fetch(`https://api.sunrise-sunset.org/json?lat=${lat}&lng=${lon}&formatted=0`);
+            })
+            .then(response => response.json())
+            .then(data => {
+                const sunrise = new Date(data.results.sunrise).toLocaleTimeString('zh-CN', { hour12: false });
+                const sunset = new Date(data.results.sunset).toLocaleTimeString('zh-CN', { hour12: false });
+                document.getElementById('sun-times').textContent = `日出：${sunrise} | 日落：${sunset}`;
+            })
+            .catch(() => document.getElementById('sun-times').textContent = '日出日落：无法加载');
 
         // 使用 hls.js 播放 RTI FM
         const audioPlayer = document.getElementById('audio-player');
