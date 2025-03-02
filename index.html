@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>每日灵感与自然</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-    <!-- 样式保持不变 -->
     <style>
         body {
             margin: 0;
@@ -14,7 +13,6 @@
             text-align: center;
             overflow: hidden;
             background: linear-gradient(135deg, #87CEEB, #4682B4);
-            transition: background 1s ease;
             min-height: 100vh;
             position: relative;
         }
@@ -43,7 +41,7 @@
             margin: 20px 0;
             text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
         }
-        #greeting, #weather, #quote, #lunar-phase, #todo-list {
+        #greeting, #weather, #quote, #lunar-phase {
             font-size: 1.5em;
             margin: 20px 0;
             background: rgba(255, 255, 255, 0.2);
@@ -80,17 +78,6 @@
             transform: translateX(-50%);
             transition: all 1s ease;
         }
-        #todo-list input {
-            padding: 5px;
-            font-size: 1em;
-        }
-        #todo-list ul {
-            list-style: none;
-            padding: 0;
-        }
-        #todo-list li {
-            margin: 5px 0;
-        }
     </style>
 </head>
 <body>
@@ -103,11 +90,6 @@
         <div id="weather">天气：加载中...</div>
         <div id="quote">每日一句：加载中...</div>
         <div id="lunar-phase">月相：加载中...</div>
-        <div id="todo-list">
-            <input type="text" id="todo-input" placeholder="添加今日任务...">
-            <button onclick="addTodo()">添加</button>
-            <ul id="todo-items"></ul>
-        </div>
         <div id="music-player">
             <audio id="audio-player" controls autoplay></audio>
             <p id="current-track">当前曲目：RTI FM 在线广播</p>
@@ -115,16 +97,11 @@
     </div>
 
     <script>
-        // 动态时钟与背景渐变
+        // 动态时钟
         function updateClock() {
             const now = new Date();
             document.getElementById('clock').textContent = now.toLocaleTimeString('zh-CN', { hour12: false });
             const hours = now.getHours();
-            const gradient = hours < 6 || hours >= 18 
-                ? 'linear-gradient(135deg, #191970, #483D8B)' 
-                : 'linear-gradient(135deg, #87CEEB, #4682B4)';
-            document.body.style.background = gradient;
-
             const greeting = hours < 6 ? '凌晨好' : hours < 12 ? '早上好' : hours < 18 ? '下午好' : '晚上好';
             document.getElementById('greeting').textContent = greeting;
 
@@ -211,18 +188,6 @@
             document.getElementById('background-image').src = `https://source.unsplash.com/random/1920x1080/?nature&${new Date().getTime()}`;
         });
 
-        // 简单待办事项
-        function addTodo() {
-            const input = document.getElementById('todo-input');
-            const text = input.value.trim();
-            if (text) {
-                const li = document.createElement('li');
-                li.textContent = text;
-                document.getElementById('todo-items').appendChild(li);
-                input.value = '';
-            }
-        }
-
         // 使用 hls.js 播放 RTI FM
         const audioPlayer = document.getElementById('audio-player');
         const currentTrackDisplay = document.getElementById('current-track');
@@ -247,7 +212,6 @@
                     console.log('HLS 错误：', data);
                 });
             } else if (audioPlayer.canPlayType('application/vnd.apple.mpegurl')) {
-                // Safari 原生支持 HLS
                 audioPlayer.src = streamUrl;
                 audioPlayer.volume = 0.25;
                 audioPlayer.play().catch(error => {
