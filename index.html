@@ -115,7 +115,6 @@
         <div id="sun-times">日出日落：加载中...</div>
         <div id="music-player">
             <audio id="audio-player" controls autoplay></audio>
-            <p id="current-track">当前曲目：RTI FM 在线广播</p>
         </div>
     </div>
 
@@ -140,20 +139,17 @@
         setInterval(updateClock, 1000);
         updateClock();
 
-        // 天气（使用 wttr.in，中国大连）
+        // 天气（优化 wttr.in，中国大连）
         const weatherElement = document.getElementById('weather');
-        fetch('https://wttr.in/大连?format=%C+%t+%h+%w+%d')
+        fetch('https://wttr.in/Dalian?format=%C+%t+%h+%w')
             .then(response => response.text())
             .then(data => {
-                const weatherMatch = data.match(/(\S+)\s+([+-]?\d+°C)\s+(\d+%)\s+([↑↓←→↗↘↙↖]\d+km\/h)/);
-                if (!weatherMatch) throw new Error("数据格式不匹配");
-
-                const weather = weatherMatch[1];
-                const temp = weatherMatch[2];
-                const humidity = weatherMatch[3];
-                const windWithDirection = weatherMatch[4];
-                const windSymbol = windWithDirection.match(/[↑↓←→↗↘↙↖]/)[0];
-                const windSpeed = windWithDirection.replace(/[^0-9.]/g, '');
+                // 拆分数据，增加容错性
+                const parts = data.split(/\s+/);
+                const weather = parts[0] || '未知';
+                const temp = parts[1]?.includes('°C') ? parts[1] : '未知';
+                const humidity = parts[2]?.includes('%') ? parts[2] : '未知';
+                const wind = parts[3]?.includes('km/h') ? parts[3] : '未知';
 
                 const weatherIcons = {
                     '晴': 'https://img.icons8.com/color/48/000000/sun.png',
@@ -164,7 +160,7 @@
                     '雪': 'https://img.icons8.com/color/48/000000/snow.png'
                 };
                 const weatherIcon = weatherIcons[weather] || 'https://img.icons8.com/color/48/000000/question-mark.png';
-                weatherElement.innerHTML = `天气：${weather} <img src="${weatherIcon}" alt="${weather}"> | 温度：${temp} | 湿度：${humidity} | 风速：${windSymbol}${windSpeed}km/h`;
+                weatherElement.innerHTML = `天气：${weather} <img src="${weatherIcon}" alt="${weather}"> | 温度：${temp} | 湿度：${humidity} | 风速：${wind}`;
             })
             .catch(() => weatherElement.textContent = '天气：无法加载');
 
@@ -288,9 +284,8 @@
             })
             .catch(() => document.getElementById('sun-times').textContent = '日出日落：无法加载');
 
-        // 音乐播放器
+        // 音乐播放器（移除当前曲目文字）
         const audioPlayer = document.getElementById('audio-player');
-        const currentTrackDisplay = document.getElementById('current-track');
         const streamUrl = 'https://streamak0138.akamaized.net/live0138lh-mbm9/_definst_/rti3/chunklist.m3u8';
 
         function loadAndPlayRadio() {
@@ -311,7 +306,6 @@
                     document.body.addEventListener('click', () => audioPlayer.play(), { once: true });
                 });
             }
-            currentTrackDisplay.textContent = '当前曲目：RTI FM 在线广播';
         }
         loadAndPlayRadio();
 
