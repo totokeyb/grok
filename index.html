@@ -119,11 +119,11 @@
             <ul id="todo-items"></ul>
         </div>
         <div id="music-player">
-            <audio controls loop>
-                <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+            <audio id="audio-player" controls autoplay>
+                <source src="" type="audio/mpeg">
                 您的浏览器不支持音频播放。
             </audio>
-            <p>自然旋律（点击播放）</p>
+            <p id="current-track">当前曲目：加载中...</p>
         </div>
     </div>
 
@@ -211,10 +211,10 @@
         }
         document.getElementById('quote').textContent = `每日一句：${getRandomQuote()}`;
 
-        // 月相（简化为文本描述）
+        // 月相
         function updateLunarPhase() {
             const now = new Date();
-            const lunarDay = now.getDate() % 30; // 简化模拟
+            const lunarDay = now.getDate() % 30;
             const phases = ['新月', '上弦月', '满月', '下弦月'];
             const phase = phases[Math.floor(lunarDay / 7.5)] || '未知';
             document.getElementById('lunar-phase').textContent = `月相：${phase}`;
@@ -251,6 +251,30 @@
                 input.value = '';
             }
         }
+
+        // 动态音乐播放列表
+        const playlist = [
+            { name: '森林溪流', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3' },
+            { name: '海浪轻拍', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3' },
+            { name: '鸟鸣晨曦', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3' }
+        ];
+        let currentTrackIndex = 0;
+        const audioPlayer = document.getElementById('audio-player');
+        const currentTrackDisplay = document.getElementById('current-track');
+
+        function playNextTrack() {
+            currentTrackIndex = (currentTrackIndex + 1) % playlist.length;
+            audioPlayer.src = playlist[currentTrackIndex].url;
+            currentTrackDisplay.textContent = `当前曲目：${playlist[currentTrackIndex].name}`;
+            audioPlayer.play();
+        }
+
+        // 初始化音乐
+        audioPlayer.src = playlist[currentTrackIndex].url;
+        currentTrackDisplay.textContent = `当前曲目：${playlist[currentTrackIndex].name}`;
+        audioPlayer.volume = 0.25; // 默认音量25%
+        audioPlayer.autoplay = true; // 自动播放
+        audioPlayer.addEventListener('ended', playNextTrack); // 播放结束时切换下一首
     </script>
 </body>
 </html>
