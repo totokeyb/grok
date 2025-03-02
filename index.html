@@ -47,19 +47,13 @@
             margin: 20px 0;
             text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
         }
-        #greeting, #weather, #quote, #lunar-phase, #daily-fortune, #nature-fact, #sun-times {
+        #greeting, #quote, #lunar-phase, #daily-fortune, #nature-fact, #sun-times {
             font-size: 1.5em;
             margin: 20px 0;
             background: rgba(255, 255, 255, 0.2);
             padding: 10px;
             border-radius: 10px;
             display: block;
-        }
-        #weather img {
-            width: 30px;
-            height: 30px;
-            vertical-align: middle;
-            margin-left: 10px;
         }
         #music-player {
             margin: 20px 0;
@@ -107,7 +101,6 @@
         <h1 id="title">每日灵感与自然</h1>
         <div id="clock"></div>
         <div id="greeting"></div>
-        <div id="weather">天气：加载中...</div>
         <div id="quote">每日一句：加载中...</div>
         <div id="lunar-phase">月相：加载中...</div>
         <div id="daily-fortune">今日运势：加载中...</div>
@@ -138,31 +131,6 @@
         }
         setInterval(updateClock, 1000);
         updateClock();
-
-        // 天气（优化 wttr.in，中国大连）
-        const weatherElement = document.getElementById('weather');
-        fetch('https://wttr.in/Dalian?format=%C+%t+%h+%w')
-            .then(response => response.text())
-            .then(data => {
-                // 拆分数据，增加容错性
-                const parts = data.split(/\s+/);
-                const weather = parts[0] || '未知';
-                const temp = parts[1]?.includes('°C') ? parts[1] : '未知';
-                const humidity = parts[2]?.includes('%') ? parts[2] : '未知';
-                const wind = parts[3]?.includes('km/h') ? parts[3] : '未知';
-
-                const weatherIcons = {
-                    '晴': 'https://img.icons8.com/color/48/000000/sun.png',
-                    '晴天': 'https://img.icons8.com/color/48/000000/sun.png',
-                    '多云': 'https://img.icons8.com/color/48/000000/partly-cloudy-day.png',
-                    '阴': 'https://img.icons8.com/color/48/000000/cloud.png',
-                    '雨': 'https://img.icons8.com/color/48/000000/rain.png',
-                    '雪': 'https://img.icons8.com/color/48/000000/snow.png'
-                };
-                const weatherIcon = weatherIcons[weather] || 'https://img.icons8.com/color/48/000000/question-mark.png';
-                weatherElement.innerHTML = `天气：${weather} <img src="${weatherIcon}" alt="${weather}"> | 温度：${temp} | 湿度：${humidity} | 风速：${wind}`;
-            })
-            .catch(() => weatherElement.textContent = '天气：无法加载');
 
         // 每日一句（20条静态中文）
         const quotes = [
