@@ -26,7 +26,6 @@
             z-index: -1;
             opacity: 0.7;
             filter: blur(2px);
-            display: block;
         }
         #container {
             position: relative;
@@ -36,20 +35,19 @@
         h1 {
             font-size: 3em;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-            cursor: pointer;
         }
         #clock {
             font-size: 2.5em;
             margin: 20px 0;
             text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
         }
-        #weather, #quote {
+        #greeting, #weather, #quote, #lunar-phase, #todo-list {
             font-size: 1.5em;
             margin: 20px 0;
             background: rgba(255, 255, 255, 0.2);
             padding: 10px;
             border-radius: 10px;
-            display: inline-block;
+            display: block;
         }
         #weather img {
             width: 30px;
@@ -60,7 +58,7 @@
         #music-player {
             margin: 20px 0;
         }
-        #particles {
+        #particles, #sky-animation {
             position: fixed;
             top: 0;
             left: 0;
@@ -75,21 +73,51 @@
             border-radius: 50%;
             animation: float 10s infinite ease-in-out;
         }
+        #sun-moon {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #FFD700, #FFA500);
+            top: 10%;
+            left: 50%;
+            transform: translateX(-50%);
+            transition: all 1s ease;
+        }
         @keyframes float {
             0% { transform: translateY(0); opacity: 1; }
             50% { opacity: 0.5; }
             100% { transform: translateY(-100vh); opacity: 0; }
         }
+        #todo-list input {
+            padding: 5px;
+            font-size: 1em;
+        }
+        #todo-list ul {
+            list-style: none;
+            padding: 0;
+        }
+        #todo-list li {
+            margin: 5px 0;
+        }
     </style>
 </head>
 <body>
-    <img id="background-image" src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80" alt="自然背景">
+    <img id="background-image" src="https://source.unsplash.com/random/1920x1080/?nature" alt="自然背景">
     <div id="particles"></div>
+    <div id="sky-animation"><div id="sun-moon"></div></div>
     <div id="container">
-        <h1 onclick="changeTheme()">每日灵感与自然</h1>
+        <h1>每日灵感与自然</h1>
         <div id="clock"></div>
+        <div id="greeting"></div>
         <div id="weather">天气：加载中...</div>
         <div id="quote">每日一句：加载中...</div>
+        <div id="lunar-phase">月相：加载中...</div>
+        <div id="todo-list">
+            <input type="text" id="todo-input" placeholder="添加今日任务...">
+            <button onclick="addTodo()">添加</button>
+            <ul id="todo-items"></ul>
+        </div>
         <div id="music-player">
             <audio controls loop>
                 <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
@@ -106,9 +134,23 @@
             document.getElementById('clock').textContent = now.toLocaleTimeString('zh-CN', { hour12: false });
             const hours = now.getHours();
             const gradient = hours < 6 || hours >= 18 
-                ? 'linear-gradient(135deg, #191970, #483D8B)'
+                ? 'linear-gradient(135deg, #191970, #483D8B)' 
                 : 'linear-gradient(135deg, #87CEEB, #4682B4)';
             document.body.style.background = gradient;
+
+            // 更新问候语
+            const greeting = hours < 6 ? '凌晨好' : hours < 12 ? '早上好' : hours < 18 ? '下午好' : '晚上好';
+            document.getElementById('greeting').textContent = greeting;
+
+            // 动态太阳/月亮动画
+            const sunMoon = document.getElementById('sun-moon');
+            if (hours < 6 || hours >= 18) {
+                sunMoon.style.background = 'radial-gradient(circle, #C0C0C0, #808080)';
+                sunMoon.style.top = '20%';
+            } else {
+                sunMoon.style.background = 'radial-gradient(circle, #FFD700, #FFA500)';
+                sunMoon.style.top = '10%';
+            }
         }
         setInterval(updateClock, 1000);
         updateClock();
@@ -137,7 +179,6 @@
                     '雪': 'https://img.icons8.com/color/48/000000/snow.png'
                 };
                 const weatherIcon = weatherIcons[weather] || 'https://img.icons8.com/color/48/000000/question-mark.png';
-
                 weatherElement.innerHTML = `天气：${weather} <img src="${weatherIcon}" alt="${weather}"> | 温度：${temp} | 湿度：${humidity} | 风速：${windSymbol}${windSpeed}km/h`;
             })
             .catch(() => weatherElement.textContent = '天气：无法加载');
@@ -170,20 +211,15 @@
         }
         document.getElementById('quote').textContent = `每日一句：${getRandomQuote()}`;
 
-        // 主题颜色切换
-        const themes = [
-            'linear-gradient(135deg, #87CEEB, #4682B4)',
-            'linear-gradient(135deg, #FFD700, #FFA500)',
-            'linear-gradient(135deg, #98FB98, #228B22)',
-            'linear-gradient(135deg, #DDA0DD, #4B0082)',
-            'linear-gradient(135deg, #F0E68C, #DAA520)'
-        ];
-        let themeIndex = 0;
-
-        function changeTheme() {
-            document.body.style.background = themes[themeIndex];
-            themeIndex = (themeIndex + 1) % themes.length;
+        // 月相（简化为文本描述）
+        function updateLunarPhase() {
+            const now = new Date();
+            const lunarDay = now.getDate() % 30; // 简化模拟
+            const phases = ['新月', '上弦月', '满月', '下弦月'];
+            const phase = phases[Math.floor(lunarDay / 7.5)] || '未知';
+            document.getElementById('lunar-phase').textContent = `月相：${phase}`;
         }
+        updateLunarPhase();
 
         // 粒子效果
         function createParticle() {
@@ -199,21 +235,22 @@
         }
         setInterval(createParticle, 500);
 
-        // 背景图片加载和刷新
-        const bgImage = document.getElementById('background-image');
-        bgImage.onerror = () => {
-            console.log('背景图片加载失败，切换到备用图片');
-            bgImage.src = 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80'; // 第二备用图片
-        };
-        bgImage.onload = () => console.log('背景图片加载成功');
-        bgImage.addEventListener('click', () => {
-            const images = [
-                'https://images.unsplash.com/photo-1506744038136-46273834b3fb?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80',
-                'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80',
-                'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80'
-            ];
-            bgImage.src = images[Math.floor(Math.random() * images.length)];
+        // 刷新背景图片
+        document.getElementById('background-image').addEventListener('click', () => {
+            document.getElementById('background-image').src = `https://source.unsplash.com/random/1920x1080/?nature&${new Date().getTime()}`;
         });
+
+        // 简单待办事项
+        function addTodo() {
+            const input = document.getElementById('todo-input');
+            const text = input.value.trim();
+            if (text) {
+                const li = document.createElement('li');
+                li.textContent = text;
+                document.getElementById('todo-items').appendChild(li);
+                input.value = '';
+            }
+        }
     </script>
 </body>
 </html>
