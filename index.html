@@ -11,11 +11,9 @@
             font-family: 'Arial', sans-serif;
             color: #fff;
             text-align: center;
-            overflow: hidden;
             background: linear-gradient(135deg, #87CEEB, #4682B4);
             min-height: 100vh;
             position: relative;
-            transition: background 0.5s ease;
         }
         #background-image {
             position: fixed;
@@ -32,6 +30,8 @@
             position: relative;
             z-index: 1;
             padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
         }
         h1 {
             font-size: 3em;
@@ -47,7 +47,7 @@
             margin: 20px 0;
             text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
         }
-        #greeting, #weather, #quote, #lunar-phase, #daily-fortune, #nature-fact, #color-picker, #sun-times {
+        #greeting, #weather, #quote, #lunar-phase, #daily-fortune, #nature-fact, #sun-times {
             font-size: 1.5em;
             margin: 20px 0;
             background: rgba(255, 255, 255, 0.2);
@@ -63,6 +63,10 @@
         }
         #music-player {
             margin: 20px 0;
+            position: sticky;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px;
         }
         #sky-animation {
             position: fixed;
@@ -93,10 +97,6 @@
             z-index: 0;
             pointer-events: none;
         }
-        #color-picker input {
-            margin: 0 10px;
-            vertical-align: middle;
-        }
     </style>
 </head>
 <body>
@@ -112,11 +112,6 @@
         <div id="lunar-phase">月相：加载中...</div>
         <div id="daily-fortune">今日运势：加载中...</div>
         <div id="nature-fact">自然小知识：加载中...</div>
-        <div id="color-picker">
-            调整背景颜色：
-            <input type="color" id="color1" value="#87CEEB">
-            <input type="color" id="color2" value="#4682B4">
-        </div>
         <div id="sun-times">日出日落：加载中...</div>
         <div id="music-player">
             <audio id="audio-player" controls autoplay></audio>
@@ -171,13 +166,28 @@
             })
             .catch(() => weatherElement.textContent = '天气：无法加载');
 
-        // 每日一句
+        // 每日一句（扩展到20条）
         const quotes = [
             "生命是一场旅行，不是目的地，而是沿途的风景。——佚名",
             "最深的河流总是最安静地流淌。——拉丁谚语",
             "每一个日出都带来新的希望。——佚名",
             "自然的美是无声的诗。——约翰·济慈",
-            "坚持不懈，直到成功。——丘吉尔"
+            "坚持不懈，直到成功。——丘吉尔",
+            "时间是治愈一切的良药。——古罗马谚语",
+            "勇敢面对风暴，你会发现自己的力量。——佚名",
+            "幸福是内心的平静。——达赖喇嘛",
+            "每一滴水都能折射出整个太阳。——印度谚语",
+            "行动是梦想的起点。——沃尔特·迪士尼",
+            "生活是一面镜子，你对它笑，它就对你笑。——佚名",
+            "成功的秘诀在于永不放弃。——爱迪生",
+            "心若向阳，无畏悲伤。——佚名",
+            "机会总是留给有准备的人。——巴斯德",
+            "逆境是成长的催化剂。——佚名",
+            "用爱和智慧点亮人生。——卢梭",
+            "真正的财富是健康与时间。——富兰克林",
+            "简单生活，心灵自由。——梭罗",
+            "相信自己，你已成功一半。——罗斯福",
+            "世界因你而不同，勇敢做自己。——佚名"
         ];
         function getRandomQuote() {
             let usedQuotes = JSON.parse(localStorage.getItem('usedQuotes')) || [];
@@ -208,36 +218,57 @@
             document.getElementById('background-image').src = `https://source.unsplash.com/random/1920x1080/?nature&${new Date().getTime()}`;
         });
 
-        // 每日运势
+        // 每日运势（扩展到20条）
         const fortunes = [
             "今天适合尝试新事物，好运会伴随你。",
             "保持耐心，成功就在前方等待。",
             "与人合作将带来意外收获。",
             "今天是思考未来的好时机。",
-            "小风险可能带来大回报。"
+            "小风险可能带来大回报。",
+            "积极的心态会为你打开新门。",
+            "今天宜倾听内心，直觉最准。",
+            "努力终有回报，坚持下去。",
+            "与朋友相处，欢乐加倍。",
+            "勇敢表达自己，机会自来。",
+            "今天适合学习新技能。",
+            "平静应对挑战，智慧显现。",
+            "好运藏在细节中，细心观察。",
+            "今天宜放下顾虑，轻装前行。",
+            "笑容是你今日的幸运符。",
+            "意外之喜将在午后出现。",
+            "保持专注，目标更近一步。",
+            "今天适合户外活动，焕发活力。",
+            "善待他人，好运循环。",
+            "大胆梦想，宇宙为你助力。"
         ];
         document.getElementById('daily-fortune').textContent = `今日运势：${fortunes[Math.floor(Math.random() * fortunes.length)]}`;
 
-        // 自然小知识
+        // 自然小知识（扩展到20条）
         const natureFacts = [
             "蜜蜂一生只能蜇一次，之后它们会死去。",
             "章鱼有三个心脏，可以改变颜色融入环境。",
             "地球上最老的树已有4850多年历史。",
             "鲸鱼的歌声可以在海洋中传播数千公里。",
-            "北极熊的毛其实是透明的，看起来白是因为光反射。"
+            "北极熊的毛其实是透明的，看起来白是因为光反射。",
+            "海星没有大脑，却能感知周围环境。",
+            "树懒每分钟心跳只有约40次。",
+            "企鹅能在水下憋气超过20分钟。",
+            "红杉树是地球上最高的树种，可达115米。",
+            "蝙蝠是唯一会飞的哺乳动物。",
+            "珊瑚礁被称为海洋的热带雨林。",
+            "乌鸦能记住人类的模样长达数年。",
+            "沙漠中的仙人掌能储存数升水。",
+            "闪电每次击中地面释放的能量可点亮100万盏灯。",
+            "袋鼠跳跃时速可达70公里。",
+            "蓝鲸的心脏重达180公斤。",
+            "萤火虫发光是为了吸引伴侣。",
+            "非洲象的耳朵能帮助散热。",
+            "蜘蛛丝的强度堪比钢丝。",
+            "猫头鹰能将头部旋转270度。"
         ];
         document.getElementById('nature-fact').textContent = `自然小知识：${natureFacts[Math.floor(Math.random() * natureFacts.length)]}`;
 
-        // 颜色选择器
-        const color1 = document.getElementById('color1');
-        const color2 = document.getElementById('color2');
-        function updateBackground() {
-            document.body.style.background = `linear-gradient(135deg, ${color1.value}, ${color2.value})`;
-        }
-        color1.addEventListener('input', updateBackground);
-        color2.addEventListener('input', updateBackground);
-
-        // 日出日落时间（使用简单模拟，真实数据需API）
+        // 日出日落时间
         function updateSunTimes() {
             const now = new Date();
             const sunrise = new Date(now.setHours(6, 30, 0)).toLocaleTimeString('zh-CN', { hour12: false });
@@ -321,7 +352,6 @@
             const titleText = title.textContent;
             title.style.opacity = '0';
 
-            // 生成粒子
             for (let i = 0; i < 50; i++) {
                 particlesArray.push(new Particle(
                     rect.left + rect.width / 2,
@@ -329,11 +359,9 @@
                 ));
             }
 
-            // 随机改变标题颜色
             const randomColor = '#' + Math.floor(Math.random()*16777215).toString(16);
             title.style.color = randomColor;
 
-            // 1秒后重组标题
             setTimeout(() => {
                 title.style.opacity = '1';
                 let index = 0;
