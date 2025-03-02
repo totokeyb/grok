@@ -132,42 +132,15 @@
         setInterval(updateClock, 1000);
         updateClock();
 
-        // 每日一句（20条静态中文）
-        const quotes = [
-            "生命是一场旅行，不是目的地，而是沿途的风景。——佚名",
-            "最深的河流总是最安静地流淌。——拉丁谚语",
-            "每一个日出都带来新的希望。——佚名",
-            "自然的美是无声的诗。——约翰·济慈",
-            "坚持不懈，直到成功。——丘吉尔",
-            "时间是治愈一切的良药。——古罗马谚语",
-            "勇敢面对风暴，你会发现自己的力量。——佚名",
-            "幸福是内心的平静。——达赖喇嘛",
-            "每一滴水都能折射出整个太阳。——印度谚语",
-            "行动是梦想的起点。——沃尔特·迪士尼",
-            "生活是一面镜子，你对它笑，它就对你笑。——佚名",
-            "成功的秘诀在于永不放弃。——爱迪生",
-            "心若向阳，无畏悲伤。——佚名",
-            "机会总是留给有准备的人。——巴斯德",
-            "逆境是成长的催化剂。——佚名",
-            "用爱和智慧点亮人生。——卢梭",
-            "真正的财富是健康与时间。——富兰克林",
-            "简单生活，心灵自由。——梭罗",
-            "相信自己，你已成功一半。——罗斯福",
-            "世界因你而不同，勇敢做自己。——佚名"
-        ];
-        function getRandomQuote() {
-            let usedQuotes = JSON.parse(localStorage.getItem('usedQuotes')) || [];
-            let availableQuotes = quotes.filter(q => !usedQuotes.includes(q));
-            if (availableQuotes.length === 0) {
-                usedQuotes = [];
-                availableQuotes = quotes.slice();
-            }
-            const quote = availableQuotes[Math.floor(Math.random() * availableQuotes.length)];
-            usedQuotes.push(quote);
-            localStorage.setItem('usedQuotes', JSON.stringify(usedQuotes));
-            return quote;
-        }
-        document.getElementById('quote').textContent = `每日一句：${getRandomQuote()}`;
+        // 每日一句（使用韩小韩API）
+        fetch('https://api.vvhan.com/api/yan?type=json')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('quote').textContent = `每日一句：${data.yan}`;
+            })
+            .catch(() => {
+                document.getElementById('quote').textContent = '每日一句：加载失败，请稍后再试';
+            });
 
         // 月相
         function updateLunarPhase() {
