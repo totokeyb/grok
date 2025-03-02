@@ -15,6 +15,7 @@
             background: linear-gradient(135deg, #87CEEB, #4682B4);
             min-height: 100vh;
             position: relative;
+            transition: background 0.5s ease;
         }
         #background-image {
             position: fixed;
@@ -35,13 +36,18 @@
         h1 {
             font-size: 3em;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            cursor: pointer;
+            transition: transform 0.3s ease, color 0.3s ease;
+        }
+        h1:hover {
+            transform: scale(1.05);
         }
         #clock {
             font-size: 2.5em;
             margin: 20px 0;
             text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
         }
-        #greeting, #weather, #quote, #lunar-phase {
+        #greeting, #weather, #quote, #lunar-phase, #daily-fortune, #nature-fact, #color-picker, #sun-times {
             font-size: 1.5em;
             margin: 20px 0;
             background: rgba(255, 255, 255, 0.2);
@@ -78,18 +84,40 @@
             transform: translateX(-50%);
             transition: all 1s ease;
         }
+        #particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+        #color-picker input {
+            margin: 0 10px;
+            vertical-align: middle;
+        }
     </style>
 </head>
 <body>
     <img id="background-image" src="https://source.unsplash.com/random/1920x1080/?nature" alt="自然背景" onerror="this.src='https://picsum.photos/1920/1080';">
     <div id="sky-animation"><div id="sun-moon"></div></div>
+    <canvas id="particles"></canvas>
     <div id="container">
-        <h1>每日灵感与自然</h1>
+        <h1 id="title">每日灵感与自然</h1>
         <div id="clock"></div>
         <div id="greeting"></div>
         <div id="weather">天气：加载中...</div>
         <div id="quote">每日一句：加载中...</div>
         <div id="lunar-phase">月相：加载中...</div>
+        <div id="daily-fortune">今日运势：加载中...</div>
+        <div id="nature-fact">自然小知识：加载中...</div>
+        <div id="color-picker">
+            调整背景颜色：
+            <input type="color" id="color1" value="#87CEEB">
+            <input type="color" id="color2" value="#4682B4">
+        </div>
+        <div id="sun-times">日出日落：加载中...</div>
         <div id="music-player">
             <audio id="audio-player" controls autoplay></audio>
             <p id="current-track">当前曲目：RTI FM 在线广播</p>
@@ -124,14 +152,12 @@
             .then(data => {
                 const weatherMatch = data.match(/(\S+)\s+([+-]?\d+°C)\s+(\d+%)\s+([↑↓←→↗↘↙↖]\d+km\/h)/);
                 if (!weatherMatch) throw new Error("数据格式不匹配");
-
                 const weather = weatherMatch[1];
                 const temp = weatherMatch[2];
                 const humidity = weatherMatch[3];
                 const windWithDirection = weatherMatch[4];
                 const windSymbol = windWithDirection.match(/[↑↓←→↗↘↙↖]/)[0];
                 const windSpeed = windWithDirection.replace(/[^0-9.]/g, '');
-
                 const weatherIcons = {
                     '晴': 'https://img.icons8.com/color/48/000000/sun.png',
                     '晴天': 'https://img.icons8.com/color/48/000000/sun.png',
@@ -151,14 +177,8 @@
             "最深的河流总是最安静地流淌。——拉丁谚语",
             "每一个日出都带来新的希望。——佚名",
             "自然的美是无声的诗。——约翰·济慈",
-            "坚持不懈，直到成功。——丘吉尔",
-            "时间是治愈一切的良药。——古罗马谚语",
-            "勇敢面对风暴，你会发现自己的力量。——佚名",
-            "幸福是内心的平静。——达赖喇嘛",
-            "每一滴水都能折射出整个太阳。——印度谚语",
-            "行动是梦想的起点。——沃尔特·迪士尼"
+            "坚持不懈，直到成功。——丘吉尔"
         ];
-
         function getRandomQuote() {
             let usedQuotes = JSON.parse(localStorage.getItem('usedQuotes')) || [];
             let availableQuotes = quotes.filter(q => !usedQuotes.includes(q));
@@ -188,6 +208,44 @@
             document.getElementById('background-image').src = `https://source.unsplash.com/random/1920x1080/?nature&${new Date().getTime()}`;
         });
 
+        // 每日运势
+        const fortunes = [
+            "今天适合尝试新事物，好运会伴随你。",
+            "保持耐心，成功就在前方等待。",
+            "与人合作将带来意外收获。",
+            "今天是思考未来的好时机。",
+            "小风险可能带来大回报。"
+        ];
+        document.getElementById('daily-fortune').textContent = `今日运势：${fortunes[Math.floor(Math.random() * fortunes.length)]}`;
+
+        // 自然小知识
+        const natureFacts = [
+            "蜜蜂一生只能蜇一次，之后它们会死去。",
+            "章鱼有三个心脏，可以改变颜色融入环境。",
+            "地球上最老的树已有4850多年历史。",
+            "鲸鱼的歌声可以在海洋中传播数千公里。",
+            "北极熊的毛其实是透明的，看起来白是因为光反射。"
+        ];
+        document.getElementById('nature-fact').textContent = `自然小知识：${natureFacts[Math.floor(Math.random() * natureFacts.length)]}`;
+
+        // 颜色选择器
+        const color1 = document.getElementById('color1');
+        const color2 = document.getElementById('color2');
+        function updateBackground() {
+            document.body.style.background = `linear-gradient(135deg, ${color1.value}, ${color2.value})`;
+        }
+        color1.addEventListener('input', updateBackground);
+        color2.addEventListener('input', updateBackground);
+
+        // 日出日落时间（使用简单模拟，真实数据需API）
+        function updateSunTimes() {
+            const now = new Date();
+            const sunrise = new Date(now.setHours(6, 30, 0)).toLocaleTimeString('zh-CN', { hour12: false });
+            const sunset = new Date(now.setHours(18, 45, 0)).toLocaleTimeString('zh-CN', { hour12: false });
+            document.getElementById('sun-times').textContent = `日出：${sunrise} | 日落：${sunset}`;
+        }
+        updateSunTimes();
+
         // 使用 hls.js 播放 RTI FM
         const audioPlayer = document.getElementById('audio-player');
         const currentTrackDisplay = document.getElementById('current-track');
@@ -200,35 +258,96 @@
                 hls.attachMedia(audioPlayer);
                 hls.on(Hls.Events.MANIFEST_PARSED, () => {
                     audioPlayer.volume = 0.25;
-                    audioPlayer.play().catch(error => {
-                        console.log('自动播放失败：', error);
-                        document.body.addEventListener('click', () => {
-                            audioPlayer.play();
-                            console.log('用户点击后播放开始');
-                        }, { once: true });
+                    audioPlayer.play().catch(() => {
+                        document.body.addEventListener('click', () => audioPlayer.play(), { once: true });
                     });
-                });
-                hls.on(Hls.Events.ERROR, (event, data) => {
-                    console.log('HLS 错误：', data);
                 });
             } else if (audioPlayer.canPlayType('application/vnd.apple.mpegurl')) {
                 audioPlayer.src = streamUrl;
                 audioPlayer.volume = 0.25;
-                audioPlayer.play().catch(error => {
-                    console.log('自动播放失败：', error);
-                    document.body.addEventListener('click', () => {
-                        audioPlayer.play();
-                        console.log('用户点击后播放开始');
-                    }, { once: true });
+                audioPlayer.play().catch(() => {
+                    document.body.addEventListener('click', () => audioPlayer.play(), { once: true });
                 });
-            } else {
-                console.log('浏览器不支持 HLS');
-                currentTrackDisplay.textContent = '当前曲目：浏览器不支持 HLS 播放';
             }
             currentTrackDisplay.textContent = '当前曲目：RTI FM 在线广播';
         }
-
         loadAndPlayRadio();
+
+        // 粒子效果和标题点击事件
+        const canvas = document.getElementById('particles');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        let particlesArray = [];
+        class Particle {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.size = Math.random() * 5 + 1;
+                this.speedX = Math.random() * 3 - 1.5;
+                this.speedY = Math.random() * 3 - 1.5;
+                this.life = 100;
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                this.life--;
+            }
+            draw() {
+                ctx.fillStyle = `rgba(255, 255, 255, ${this.life / 100})`;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let i = particlesArray.length - 1; i >= 0; i--) {
+                particlesArray[i].update();
+                particlesArray[i].draw();
+                if (particlesArray[i].life <= 0) {
+                    particlesArray.splice(i, 1);
+                }
+            }
+            requestAnimationFrame(animateParticles);
+        }
+        animateParticles();
+
+        const title = document.getElementById('title');
+        title.addEventListener('click', () => {
+            const rect = title.getBoundingClientRect();
+            const titleText = title.textContent;
+            title.style.opacity = '0';
+
+            // 生成粒子
+            for (let i = 0; i < 50; i++) {
+                particlesArray.push(new Particle(
+                    rect.left + rect.width / 2,
+                    rect.top + rect.height / 2
+                ));
+            }
+
+            // 随机改变标题颜色
+            const randomColor = '#' + Math.floor(Math.random()*16777215).toString(16);
+            title.style.color = randomColor;
+
+            // 1秒后重组标题
+            setTimeout(() => {
+                title.style.opacity = '1';
+                let index = 0;
+                title.textContent = '';
+                const reappear = setInterval(() => {
+                    if (index < titleText.length) {
+                        title.textContent += titleText[index];
+                        index++;
+                    } else {
+                        clearInterval(reappear);
+                    }
+                }, 50);
+            }, 1000);
+        });
     </script>
 </body>
 </html>
