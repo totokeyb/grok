@@ -11,7 +11,7 @@
             color: #fff;
             text-align: center;
             overflow: hidden;
-            background: linear-gradient(135deg, #87CEEB, #4682B4); /* 默认蓝天渐变 */
+            background: linear-gradient(135deg, #87CEEB, #4682B4);
             transition: background 1s ease;
             min-height: 100vh;
             position: relative;
@@ -26,6 +26,7 @@
             z-index: -1;
             opacity: 0.7;
             filter: blur(2px);
+            display: block;
         }
         #container {
             position: relative;
@@ -35,7 +36,7 @@
         h1 {
             font-size: 3em;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-            cursor: pointer; /* 点击标题切换颜色 */
+            cursor: pointer;
         }
         #clock {
             font-size: 2.5em;
@@ -82,7 +83,7 @@
     </style>
 </head>
 <body>
-    <img id="background-image" src="https://source.unsplash.com/random/1920x1080/?nature" alt="自然背景">
+    <img id="background-image" src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80" alt="自然背景">
     <div id="particles"></div>
     <div id="container">
         <h1 onclick="changeTheme()">每日灵感与自然</h1>
@@ -105,8 +106,8 @@
             document.getElementById('clock').textContent = now.toLocaleTimeString('zh-CN', { hour12: false });
             const hours = now.getHours();
             const gradient = hours < 6 || hours >= 18 
-                ? 'linear-gradient(135deg, #191970, #483D8B)' // 夜间深蓝
-                : 'linear-gradient(135deg, #87CEEB, #4682B4)'; // 白天浅蓝
+                ? 'linear-gradient(135deg, #191970, #483D8B)'
+                : 'linear-gradient(135deg, #87CEEB, #4682B4)';
             document.body.style.background = gradient;
         }
         setInterval(updateClock, 1000);
@@ -153,7 +154,6 @@
             "幸福是内心的平静。——达赖喇嘛",
             "每一滴水都能折射出整个太阳。——印度谚语",
             "行动是梦想的起点。——沃尔特·迪士尼"
-            // 可继续扩展
         ];
 
         function getRandomQuote() {
@@ -172,11 +172,11 @@
 
         // 主题颜色切换
         const themes = [
-            'linear-gradient(135deg, #87CEEB, #4682B4)',  // 蓝天
-            'linear-gradient(135deg, #FFD700, #FFA500)',  // 夕阳
-            'linear-gradient(135deg, #98FB98, #228B22)',  // 森林
-            'linear-gradient(135deg, #DDA0DD, #4B0082)',  // 紫霞
-            'linear-gradient(135deg, #F0E68C, #DAA520)'   // 金秋
+            'linear-gradient(135deg, #87CEEB, #4682B4)',
+            'linear-gradient(135deg, #FFD700, #FFA500)',
+            'linear-gradient(135deg, #98FB98, #228B22)',
+            'linear-gradient(135deg, #DDA0DD, #4B0082)',
+            'linear-gradient(135deg, #F0E68C, #DAA520)'
         ];
         let themeIndex = 0;
 
@@ -199,9 +199,20 @@
         }
         setInterval(createParticle, 500);
 
-        // 刷新背景图片（可选）
-        document.getElementById('background-image').addEventListener('click', () => {
-            document.getElementById('background-image').src = `https://source.unsplash.com/random/1920x1080/?nature&${new Date().getTime()}`;
+        // 背景图片加载和刷新
+        const bgImage = document.getElementById('background-image');
+        bgImage.onerror = () => {
+            console.log('背景图片加载失败，切换到备用图片');
+            bgImage.src = 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80'; // 第二备用图片
+        };
+        bgImage.onload = () => console.log('背景图片加载成功');
+        bgImage.addEventListener('click', () => {
+            const images = [
+                'https://images.unsplash.com/photo-1506744038136-46273834b3fb?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80',
+                'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80',
+                'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80'
+            ];
+            bgImage.src = images[Math.floor(Math.random() * images.length)];
         });
     </script>
 </body>
