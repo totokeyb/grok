@@ -58,7 +58,7 @@
         #music-player {
             margin: 20px 0;
         }
-        #particles, #sky-animation {
+        #sky-animation {
             position: fixed;
             top: 0;
             left: 0;
@@ -66,12 +66,6 @@
             height: 100%;
             z-index: 0;
             pointer-events: none;
-        }
-        .particle {
-            position: absolute;
-            background: rgba(255, 255, 255, 0.7);
-            border-radius: 50%;
-            animation: float 10s infinite ease-in-out;
         }
         #sun-moon {
             position: absolute;
@@ -83,11 +77,6 @@
             left: 50%;
             transform: translateX(-50%);
             transition: all 1s ease;
-        }
-        @keyframes float {
-            0% { transform: translateY(0); opacity: 1; }
-            50% { opacity: 0.5; }
-            100% { transform: translateY(-100vh); opacity: 0; }
         }
         #todo-list input {
             padding: 5px;
@@ -104,7 +93,6 @@
 </head>
 <body>
     <img id="background-image" src="https://source.unsplash.com/random/1920x1080/?nature" alt="自然背景" onerror="this.src='https://picsum.photos/1920/1080';">
-    <div id="particles"></div>
     <div id="sky-animation"><div id="sun-moon"></div></div>
     <div id="container">
         <h1>每日灵感与自然</h1>
@@ -221,20 +209,6 @@
         }
         updateLunarPhase();
 
-        // 粒子效果
-        function createParticle() {
-            const particle = document.createElement('div');
-            particle.className = 'particle';
-            const size = Math.random() * 10 + 5;
-            particle.style.width = `${size}px`;
-            particle.style.height = `${size}px`;
-            particle.style.left = `${Math.random() * 100}vw`;
-            particle.style.animationDuration = `${Math.random() * 5 + 5}s`;
-            document.getElementById('particles').appendChild(particle);
-            setTimeout(() => particle.remove(), 10000);
-        }
-        setInterval(createParticle, 500);
-
         // 刷新背景图片
         document.getElementById('background-image').addEventListener('click', () => {
             document.getElementById('background-image').src = `https://source.unsplash.com/random/1920x1080/?nature&${new Date().getTime()}`;
@@ -263,31 +237,28 @@
         const audioSource = document.getElementById('audio-source');
         const currentTrackDisplay = document.getElementById('current-track');
 
-        function playNextTrack() {
-            currentTrackIndex = (currentTrackIndex + 1) % playlist.length;
-            audioSource.src = playlist[currentTrackIndex].url;
-            currentTrackDisplay.textContent = `当前曲目：${playlist[currentTrackIndex].name}`;
-            audioPlayer.load(); // 重新加载音频以应用新源
-            audioPlayer.play().catch(() => {
-                console.log('自动播放被浏览器阻止，请手动点击播放');
+        function loadAndPlayTrack(index) {
+            audioSource.src = playlist[index].url;
+            currentTrackDisplay.textContent = `当前曲目：${playlist[index].name}`;
+            audioPlayer.load(); // 加载新音频源
+            audioPlayer.play().catch(error => {
+                console.log('自动播放失败：', error);
+                // 等待用户交互
+                document.body.addEventListener('click', () => {
+                    audioPlayer.play();
+                }, { once: true });
             });
         }
 
-        // 初始化音乐
-        audioSource.src = playlist[currentTrackIndex].url;
-        currentTrackDisplay.textContent = `当前曲目：${playlist[currentTrackIndex].name}`;
-        audioPlayer.volume = 0.25; // 默认音量25%
-        audioPlayer.autoplay = true; // 设置自动播放
-        audioPlayer.load(); // 确保加载初始音频
-        audioPlayer.addEventListener('ended', playNextTrack);
+        function playNextTrack() {
+            currentTrackIndex = (currentTrackIndex + 1) % playlist.length;
+            loadAndPlayTrack(currentTrackIndex);
+        }
 
-        // 自动播放可能被阻止的处理
-        audioPlayer.play().catch(() => {
-            console.log('自动播放失败，浏览器要求用户交互');
-            document.body.addEventListener('click', () => {
-                audioPlayer.play();
-            }, { once: true });
-        });
+        // 初始化音乐
+        audioPlayer.volume = 0.25; // 默认音量25%
+        loadAndPlayTrack(currentTrackIndex); // 加载并尝试播放第一首
+        audioPlayer.addEventListener('ended', playNextTrack); // 当曲目结束时切换
     </script>
 </body>
 </html>
