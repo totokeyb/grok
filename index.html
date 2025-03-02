@@ -107,11 +107,8 @@
             <ul id="todo-items"></ul>
         </div>
         <div id="music-player">
-            <audio id="audio-player" controls autoplay>
-                <source id="audio-source" src="" type="audio/mpeg">
-                您的浏览器不支持音频播放。
-            </audio>
-            <p id="current-track">当前曲目：加载中...</p>
+            <audio id="audio-player" controls autoplay></audio>
+            <p id="current-track">当前曲目：RTI FM 在线广播</p>
         </div>
     </div>
 
@@ -126,11 +123,9 @@
                 : 'linear-gradient(135deg, #87CEEB, #4682B4)';
             document.body.style.background = gradient;
 
-            // 更新问候语
             const greeting = hours < 6 ? '凌晨好' : hours < 12 ? '早上好' : hours < 18 ? '下午好' : '晚上好';
             document.getElementById('greeting').textContent = greeting;
 
-            // 动态太阳/月亮动画
             const sunMoon = document.getElementById('sun-moon');
             if (hours < 6 || hours >= 18) {
                 sunMoon.style.background = 'radial-gradient(circle, #C0C0C0, #808080)';
@@ -226,39 +221,25 @@
             }
         }
 
-        // 动态音乐播放列表
-        const playlist = [
-            { name: '森林溪流', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3' },
-            { name: '海浪轻拍', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3' },
-            { name: '鸟鸣晨曦', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3' }
-        ];
-        let currentTrackIndex = 0;
+        // 只保留 RTI FM 在线广播
         const audioPlayer = document.getElementById('audio-player');
-        const audioSource = document.getElementById('audio-source');
         const currentTrackDisplay = document.getElementById('current-track');
 
-        function loadAndPlayTrack(index) {
-            audioSource.src = playlist[index].url;
-            currentTrackDisplay.textContent = `当前曲目：${playlist[index].name}`;
-            audioPlayer.load(); // 加载新音频源
+        function loadAndPlayRadio() {
+            audioPlayer.src = 'https://streamak0138.akamaized.net/live0138lh-mbm9/_definst_/rti3/chunklist.m3u8';
+            currentTrackDisplay.textContent = '当前曲目：RTI FM 在线广播';
+            console.log('播放 RTI FM 在线广播');
             audioPlayer.play().catch(error => {
                 console.log('自动播放失败：', error);
-                // 等待用户交互
                 document.body.addEventListener('click', () => {
                     audioPlayer.play();
+                    console.log('用户点击后播放开始');
                 }, { once: true });
             });
         }
 
-        function playNextTrack() {
-            currentTrackIndex = (currentTrackIndex + 1) % playlist.length;
-            loadAndPlayTrack(currentTrackIndex);
-        }
-
-        // 初始化音乐
-        audioPlayer.volume = 0.25; // 默认音量25%
-        loadAndPlayTrack(currentTrackIndex); // 加载并尝试播放第一首
-        audioPlayer.addEventListener('ended', playNextTrack); // 当曲目结束时切换
+        audioPlayer.volume = 0.25; // 默认音量 25%
+        loadAndPlayRadio(); // 直接播放 RTI FM
     </script>
 </body>
 </html>
